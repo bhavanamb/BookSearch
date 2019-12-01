@@ -2,6 +2,8 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from nltk.stem.snowball import SnowballStemmer
+from string import punctuation
 import json
 import math
 import collections
@@ -12,10 +14,12 @@ import threading,queue
 
 def remove_stop_words(all_tokens,stop_words):
     lemmatizer = WordNetLemmatizer()
+    snowstem = SnowballStemmer("english")
     tokens_without_stop_words = [x for x in all_tokens if x not in stop_words]
     tokens_after_preprocess = []
     for word in tokens_without_stop_words:
-        tokens_after_preprocess.append(lemmatizer.lemmatize(word))
+        #tokens_after_preprocess.append(lemmatizer.lemmatize(word))
+        tokens_after_preprocess.append(snowstem.stem(word))
     return tokens_after_preprocess
 
 def compute_tf(tokens):
@@ -87,8 +91,9 @@ def score_value(e_title,sim_score):
             match_document = e_title + " - " + str(sim_score[e_title])
     return match_document
 
-def get_similarity(tf_idf, wordDict, qtfidfvector, title_list):
+def get_similarity(tf_idf, wordDict, qtfidfvector, title_list,q_tokens):
     temp = {}
+    display_val = {}
     for e_title in title_list:
         qdoc_similarity = 0.0
         doc_tf_idf_vector = compute_tfidfvector(tf_idf[e_title], wordDict)
@@ -97,7 +102,17 @@ def get_similarity(tf_idf, wordDict, qtfidfvector, title_list):
             qdoc_similarity = dot_product(doc_tf_idf_vector, qtfidfvector[0]) / magnitude_value
         if qdoc_similarity != 0.0:
             temp[e_title] = qdoc_similarity
-    return temp
+            tmp_dic = {}
+            for token in q_tokens:
+                tf_list = []
+                if token in tf_idf[e_title]:
+                    tf_list.append(tf_idf[e_title][token])
+                    tmp_dic[token] = tf_list
+                else:
+                    tf_list.append('0.0')
+                    tmp_dic[token] = tf_list
+        display_val[e_title]= tmp_dic
+    return temp,display_val
 
 def sort_dictionary(wordDict):
     sortedList = []
@@ -119,7 +134,7 @@ def store_tfidfvector():
     idf = {}
     i = 0
     for line in json_data:
-        if i < 1000:
+        if i < 10000:
             each_book = json.loads(line)
             if each_book["title"] not in data_items:
                 temp = {}
@@ -171,19 +186,42 @@ def return_search(query,stop_words):
     word_list.close()
     wordDict = sorted(doc_freq.keys())
     title_list = []
+    ind_list = []
+    phr_list = []
+    display_list = {}
+    temp_list = []
+    idf_dict = {}
     for i in query_tokens:
         if i not in wordDict:
             query_tokens.remove(i)
         else:
             temp = doc_freq[i]
-            for title in temp:
-                title_list.append(title)
+            print("PHR:%s"%(phr_list))
+            if len(phr_list) == 0:
+                for title in temp:
+                    ind_list.append(title)
+                    phr_list.append(title)
+                    display_list[title] = i
+            else:
+                phr_list = list(set(phr_list).intersection(set(temp)))
+                for title in temp:
+                    if title not in ind_list:
+                        ind_list.append(title)
+                        display_list[title] = i
+    #print("Final PHR: %s"%(phr_list))
+    if len(phr_list) != 0:
+        title_list = phr_list
+    else:
+        title_list = ind_list
+
     if len(query_tokens) == 0:
-        return 0
+        return 0,0,0,0,0
     search_tf = compute_tf(query_tokens)
     for key in search_tf:
         if key in idf:
             search_tf[key] = search_tf[key] * idf[key]
+            idf_dict[key] = idf[key]
+            print(idf_dict)
         else:
             search_tf[key] = 0.00
     qtfidfvector = [compute_tfidfvector(search_tf, wordDict)]
@@ -192,25 +230,54 @@ def return_search(query,stop_words):
     tf_idf = json.load(tf_idf_json)
     tf_idf_json.close()
     start = time.time()
-    sim_score = get_similarity(tf_idf, wordDict, qtfidfvector, title_list)
+    sim_score,qtfidf_value = get_similarity(tf_idf, wordDict, qtfidfvector, title_list,query_tokens)
     print("Comparision time: %s seconds" %(time.time() - start))
     docslist = sort_dictionary(sim_score)
     list_len = len(docslist)
     i = 0
     listResult = []
     simscore = []
+    simscore_dic = {}
     if list_len != 0:
         while i < len(docslist):
             temp = {}
             simscore = docslist[i][1]
             desc = title_desc[docslist[i][0]]["description"]
-            titleList = docslist[i][0]+"\n(Similarity score:"+str(simscore)+")"
+            titleList = docslist[i][0]
+            simscore_dic[titleList] = docslist[i][1]
             temp[titleList] = str(desc)
             listResult.append(temp)
             i += 1
     else:
-        return(0)
-    return(listResult,query_tokens)
+        return(0,0,0,0,0)
+    #print("listResult:%s"%(listResult))
+    stop_words = set(stopwords.words('english'))
+    for i_title in listResult:
+        displ_titl = list(i_title.keys())[0]
+        descrptn = i_title[displ_titl]
+        full_text = displ_titl + " " + descrptn
+        searchtokens = word_tokenize(full_text.lower())
+        finltokns = remove_stop_words(searchtokens,stop_words)
+        tf_result = compute_tf(finltokns)
+        #print("TF Result:%s"%(tf_result))
+        #print("Quert TF IDF: %s"%(qtfidf_value))
+        for wrd in qtfidf_value[displ_titl]:
+            #print(wrd)
+            try:
+                qtfidf_value[displ_titl][wrd].append(tf_result[wrd])
+                #qtfidf_value[displ_titl][wrd].append(simscore_dic[displ_titl])
+            except:
+                pass
+                #print("Display Title:%s"%(displ_titl))
+                #print("QTFIDF:%s"%(qtfidf_value[displ_titl]))
+                #print("TF_Result:%s"%(tf_result))
+    #print(qtfidf_value)
+    #for i in qtfidf_value:
+        #print("Key:%s, Vlau:%s"%(i,qtfidf_value[i]))
+
+
+    return(listResult,query_tokens,simscore_dic,qtfidf_value,idf_dict)
 
 if __name__ == '__main__':
     store_tfidfvector()
+
