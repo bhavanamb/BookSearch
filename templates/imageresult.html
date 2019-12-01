@@ -1,0 +1,33 @@
+﻿{% extends "layout.html" %}
+
+{% block content %}
+    <table>
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Caption</th>
+                <th>Similarity Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for key, value in document.items() %}
+            <tr>
+                <td><img src="{{ value[1] }}" alt="image"></td>
+                <td>{{ value[0] }}</td>
+                <td>{{value[2]}}</td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="{{url_for('static', filename='scripts/hilitor.js')}}"></script>
+<script type="text/javascript">
+    var myHilitor = new Hilitor("maindata");
+    myHilitor.setMatchType("open");
+    myHilitor.apply("{{ skey }}");
+</script>
+{% endblock %}

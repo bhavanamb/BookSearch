@@ -1,0 +1,25 @@
+﻿{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="jumbotron">
+    <form method="Post" action="/classify">
+        <h3>Classify</h3>
+        <div class="input-field">
+            <input type="search" placeholder="Enter Text.." name="classify">
+        </div>
+        <p></p>
+        <p><button>Classify</button></p>
+    </form>
+</div>
+<p>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <h3>{{ message }}</h3>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</p>
+
+{% endblock %}

@@ -1,0 +1,42 @@
+﻿{% extends "layout.html" %}
+
+{% block content %}
+
+    <div class="resultcontainer">
+        
+        <br /><br />
+              <table style="width:100%">
+
+                  <tr>
+                      <th>Genre</th>
+                      <th>Percentage</th>
+                  </tr>
+                  {% for key, value in document.items() %}
+                  <tr>
+                      <td>{{ key }}</td>
+                      <td>{{ value}}%</td>
+                  </tr>
+
+                  {% endfor %}
+              </table>
+              <table>
+                  {% for key, value in prob.items() %}
+                  <tr>
+                      {% for i, j in prob[key].items() %}
+                      <h2><td>P({{key}}/{{i}})=P({{i}}/{{key}})*P({{key}})/P({{i}}/not {{key}})*P(not {{key}})+P({{i}}/{{key}})*P({{key}})</td></h2>
+                      {% endfor %}
+                  </tr>
+                  <tr>
+                      {% for i, j in prob[key].items() %}
+                      <h2><td>P({{key}}/{{i}})={{j[0]}}*{{j[2]}}/{{j[1]}}*{{j[3]}}+{{j[0]}}*{{j[2]}}</td></h2>
+                      {% endfor %}
+                  </tr>
+                  {% endfor %}
+                  <tr><td></td></tr>
+              </table>
+
+    </div>
+    <div>
+
+    </div>
+{% endblock %}

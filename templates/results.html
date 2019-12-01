@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="responsive">
+        <label>IDF Values</label>
+        {% for wrd, idf_w in idfvalue.items() %}
+        <div class="row">            
+            <p strong="strong">{{wrd}}-{{idf_w}}</p>
+        </div>
+        {% endfor %}
+
+        
+        <table class="table table-striped" id="owned_stock_table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Scores</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for key, value in document.items() %}
+                <tr>
+                    <td>
+                        {{ key }} - (Similarity Score:
+                        {% if key in sim %}
+                        {{ sim[key] }}
+                        {% endif %}
+                        )
+                    </td>
+                    <td>{{ value }}</td>
+                    {% for word, scores in tfidf[key].items() %}
+                    <td>
+                        <table>
+                            <thead><tr><th>{{word}}</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td> TF-IDF: {{scores[0]}}</td>
+                                </tr>
+                                <tr>
+                                    <td>TF: {{scores[1]}}</td>
+                                </tr>
+                            </tbody>
+
+
+                        </table>
+                    </td>
+
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <td>
+                    </td>
+                </tr>
+                <tr class="border_bottom">
+                </tr>
+
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+            {% endblock %}
+
+            {% block scripts %}
+<script type="text/javascript" src="{{url_for('static', filename='scripts/hilitor.js')}}"></script>
+<script type="text/javascript">
+    var myHilitor = new Hilitor("maindata");
+    myHilitor.setMatchType("open");
+    myHilitor.apply("{{ skey }}");
+</script>
+            {% endblock %}

@@ -1,0 +1,25 @@
+﻿{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="jumbotron">
+    <form method="Post" action="/image">
+        <h3>Image Search</h3>
+        <div class="input-field">
+            <input type="search" placeholder="Enter Text.." name="image">
+        </div>
+        <p></p>
+        <p><button>Image Search</button></p>
+    </form>
+</div>
+<p>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <h3>{{ message }}</h3>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</p>
+
+{% endblock %}
