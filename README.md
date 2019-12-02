@@ -14,7 +14,7 @@
     * nltk.download('wordnet')
 * Step3: pip install flask
 * Step4: pip install Flask-Cache  
-* Step5: Change location of datafile in search.py,categorizer.py and image_search.py based on project datafile location
+* Step5: Add this project files and change location of datafile in search.py,categorizer.py and image_search.py based on project datafile location
 * In this project datafiles location:"/home/mbbhavana/BookSearch/static/data/"
 
 ## There are 3 phases in this project ##
