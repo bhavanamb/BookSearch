@@ -2,7 +2,7 @@
 
 ## Technology Used: Python 3.7, flask ##
 
-## Installation: ##
+## Deployment Instructions: ##
 ### Deploy this project in any flask based web hosting service ###
 * Step1:Create virtual environment with python 3.7
 * Step2:Install the following packages needed for this project
