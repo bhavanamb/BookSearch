@@ -6,12 +6,12 @@
 ### Deploy this project in any flask based web hosting service ###
 * Step1:Create virtual environment with python 3.7
 * Step2:Install the following packages needed for this project
-    nltk(pip install nltk)
-    logon to python console: Run following commands
-    Import nltk
-    nltk.download(punkt)
-    nltk.download(stopwords)
-    nltk.download('wordnet')
+    * nltk(pip install nltk)
+    * logon to python console: Run following commands
+    * Import nltk
+    * nltk.download(punkt)
+    * nltk.download(stopwords)
+    * nltk.download('wordnet')
 * Step3: pip install flask
 * Step4: pip install Flask-Cache  
 * Step5: Change location of datafile in search.py,categorizer.py and image_search.py based on project datafile location
