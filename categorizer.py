@@ -84,7 +84,7 @@ def get_total_word_count(store_list):
                 count_eachword[each_word] = store_list[genre][each_word]
     return count_eachword
 
-def calc_post_prob(store_list,count_eachword):
+def calc_post_prob(store_list,count_eachword,word_list):
     genre_wordcount = {}
     for genre in store_list:
         genre_wordcount[genre] = sum(store_list[genre].values())
@@ -96,8 +96,8 @@ def calc_post_prob(store_list,count_eachword):
     for genre in store_list:
         for each_word in store_list[genre]:
             # laplace smoothing
-            prob_wordgiven_genre = ((store_list[genre][each_word]))/(genre_wordcount[genre])
-            prob_wordgiven_notgenre = (count_eachword[each_word] - store_list[genre][each_word])/(total_genre_wordcount - genre_wordcount[genre])
+            prob_wordgiven_genre = ((store_list[genre][each_word])+0.01)/(genre_wordcount[genre])+len(word_list)
+            prob_wordgiven_notgenre = ((count_eachword[each_word] - store_list[genre][each_word])+0.01/(total_genre_wordcount - genre_wordcount[genre])+len(word_list)
             temp = []
             temp.append(prob_wordgiven_genre)
             temp.append(prob_wordgiven_notgenre)
@@ -182,7 +182,7 @@ if __name__ == "__main__":
     #store_list = get_genre_list(token_dic,book_word_count,store_list)
     print("Get Word Count")
     #count_eachword = get_total_word_count(store_list)
-    #store_list,p_genre = calc_post_prob(store_list,count_eachword)
+    #store_list,p_genre = calc_post_prob(store_list,count_eachword,word_list)
     #json.dump(store_list, posterior_prob)
     #json.dump(p_genre, prior_prob)
     #posterior_prob.close()
